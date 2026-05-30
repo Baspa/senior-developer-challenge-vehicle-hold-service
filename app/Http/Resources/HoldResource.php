@@ -8,6 +8,9 @@ use App\Models\Hold;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Hold
+ */
 class HoldResource extends JsonResource
 {
     /**

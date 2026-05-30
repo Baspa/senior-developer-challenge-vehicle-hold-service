@@ -23,7 +23,7 @@ class LogHoldEvent
             'vehicle_id' => $hold->vehicle_id,
             'buyer_ref' => $hold->buyer_ref,
             'status' => $hold->status->value,
-            'expires_at' => $hold->expires_at?->toIso8601String(),
+            'expires_at' => $hold->expires_at->toIso8601String(),
         ]);
     }
 }

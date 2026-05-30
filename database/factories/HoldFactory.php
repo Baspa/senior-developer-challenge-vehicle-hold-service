@@ -42,4 +42,12 @@ class HoldFactory extends Factory
             'expires_at' => now()->addMinutes(5),
         ]);
     }
+
+    public function overdue(): static
+    {
+        return $this->state(fn () => [
+            'status' => HoldStatus::Active,
+            'expires_at' => now()->subMinutes(5),
+        ]);
+    }
 }
