@@ -19,6 +19,10 @@ class EnsureApiKey
         $apiKey = $request->header('X-Api-Key');
         $validApiKey = config('hold.api_key');
 
+        if (! is_string($validApiKey) || $validApiKey === '') {
+            return new JsonResponse(['message' => 'API_KEY_NOT_CONFIGURED', 'code' => 500], 500);
+        }
+
         if ($apiKey === null) {
             return new JsonResponse(['message' => 'API_KEY_MISSING', 'code' => 400], 400);
         }
