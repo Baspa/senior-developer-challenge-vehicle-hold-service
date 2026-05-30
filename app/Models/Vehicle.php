@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Enums\HoldStatus;
 
 class Vehicle extends Model
 {
@@ -23,5 +25,11 @@ class Vehicle extends Model
     public function holds(): HasMany
     {
         return $this->hasMany(Hold::class);
+    }
+
+    /** @return HasOne<Hold, $this> */
+    public function activeHold(): HasOne
+    {
+        return $this->hasOne(Hold::class)->where('status', HoldStatus::Active);
     }
 }
