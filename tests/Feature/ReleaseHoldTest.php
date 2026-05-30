@@ -6,6 +6,7 @@ use App\Enums\HoldStatus;
 use App\Models\Hold;
 use App\Models\Vehicle;
 use App\Events\HoldReleased;
+use Database\Factories\HoldFactory;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
@@ -14,11 +15,13 @@ beforeEach(function () {
     config(['hold.api_key' => 'test-key', 'hold.ttl_minutes' => 15]);
 });
 
-test('releases an active hold and returns 200', function () {
+$headers = ['X-Api-Key' => 'test-key', 'X-Release-Token' => HoldFactory::PLAIN_TOKEN];
+
+test('releases an active hold and returns 200', function () use ($headers) {
     Event::fake();
     $hold = Hold::factory()->create();
 
-    deleteJson("/api/v1/holds/{$hold->id}", [], ['X-Api-Key' => 'test-key'])
+    deleteJson("/api/v1/holds/{$hold->id}", [], $headers)
         ->assertOk()
         ->assertJsonPath('data.id', $hold->id)
         ->assertJsonPath('data.status', HoldStatus::Released->value)
@@ -34,7 +37,10 @@ test('frees the vehicle so a fresh hold can be placed', function () {
     $vehicle = Vehicle::factory()->create();
     $hold = Hold::factory()->for($vehicle)->create();
 
-    deleteJson("/api/v1/holds/{$hold->id}", [], ['X-Api-Key' => 'test-key'])->assertOk();
+    deleteJson("/api/v1/holds/{$hold->id}", [], [
+        'X-Api-Key' => 'test-key',
+        'X-Release-Token' => HoldFactory::PLAIN_TOKEN,
+    ])->assertOk();
 
     postJson('/api/v1/holds', [
         'vehicle_id' => $vehicle->id,
@@ -46,7 +52,10 @@ test('is idempotent when the hold is already released', function () {
     Event::fake();
     $hold = Hold::factory()->released()->create();
 
-    deleteJson("/api/v1/holds/{$hold->id}", [], ['X-Api-Key' => 'test-key'])
+    deleteJson("/api/v1/holds/{$hold->id}", [], [
+        'X-Api-Key' => 'test-key',
+        'X-Release-Token' => HoldFactory::PLAIN_TOKEN,
+    ])
         ->assertOk()
         ->assertJsonPath('data.status', HoldStatus::Released->value);
 

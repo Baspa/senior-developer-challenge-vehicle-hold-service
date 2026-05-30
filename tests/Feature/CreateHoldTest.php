@@ -30,6 +30,11 @@ test('creates an active hold and returns 201 with the assignment payload shape',
 
     expect(Hold::query()->active()->count())->toBe(1);
 
+    // The plaintext token is returned, but only the hash is stored.
+    $plain = $response->json('data.release_token');
+    expect($plain)->toBeString()->not->toBeEmpty();
+    expect(Hold::query()->first()->release_token)->toBe(hash('sha256', $plain));
+
     Event::assertDispatched(HoldCreated::class);
 });
 

@@ -18,6 +18,8 @@ class HoldResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $plainReleaseToken = $this->resource->getAttribute('plain_release_token');
+
         return [
             'id' => $this->id,
             'vehicle_id' => $this->vehicle_id,
@@ -26,6 +28,7 @@ class HoldResource extends JsonResource
             'expires_at' => $this->expires_at->toIso8601String(),
             'seconds_until_expiry' => $this->secondsUntilExpiry(),
             'created_at' => $this->created_at?->toIso8601String(),
+            'release_token' => $this->when($plainReleaseToken !== null, $plainReleaseToken),
         ];
     }
 }

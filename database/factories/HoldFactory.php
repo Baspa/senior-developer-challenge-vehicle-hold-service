@@ -13,6 +13,12 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class HoldFactory extends Factory
 {
     /**
+     * The plaintext token behind the default `release_token` hash. Tests that
+     * need to release a factory-made hold send this value as `X-Release-Token`.
+     */
+    public const PLAIN_TOKEN = 'factory-token';
+    
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -24,6 +30,7 @@ class HoldFactory extends Factory
             'buyer_ref' => 'lead-' . fake()->numberBetween(1000, 9999),
             'status' => HoldStatus::Active,
             'expires_at' => now()->addMinutes(15),
+            'release_token' => hash('sha256', self::PLAIN_TOKEN),
         ];
     }
 

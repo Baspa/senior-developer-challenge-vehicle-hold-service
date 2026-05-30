@@ -16,6 +16,11 @@ function getBuyerRef() {
     return ref;
 }
 
+const tokenKey = (holdId) => `release-token:${holdId}`;
+const storeReleaseToken = (holdId, token) => localStorage.setItem(tokenKey(holdId), token);
+const getReleaseToken = (holdId) => localStorage.getItem(tokenKey(holdId));
+const clearReleaseToken = (holdId) => localStorage.removeItem(tokenKey(holdId));
+
 Alpine.data('dashboard', () => ({
     toast: null,
     toastTone: 'info',
@@ -70,6 +75,7 @@ Alpine.data('vehicleCard', (initial) => ({
             const body = await res.json();
             if (res.status === 201) {
                 this.hold = { id: body.data.id, buyer_ref: body.data.buyer_ref, expires_at: body.data.expires_at };
+                storeReleaseToken(body.data.id, body.data.release_token);
                 this.startCountdown();
                 this.$dispatch('toast', { message: `Reserved ${this.vehicle.name}`, tone: 'info' });
             } else if (res.status === 409) {
@@ -87,12 +93,14 @@ Alpine.data('vehicleCard', (initial) => ({
     async release() {
         if (!this.hold) return;
         this.busy = true;
+        const token = getReleaseToken(this.hold.id);
         try {
             const res = await fetch(`/api/v1/holds/${this.hold.id}`, {
                 method: 'DELETE',
-                headers: { 'Accept': 'application/json', 'X-Api-Key': this.apiKey },
+                headers: { 'Accept': 'application/json', 'X-Api-Key': this.apiKey, 'X-Release-Token': token },
             });
             if (res.ok) {
+                clearReleaseToken(this.hold.id);
                 this.hold = null;
                 clearInterval(this.tickHandle);
                 this.$dispatch('toast', { message: `Released ${this.vehicle.name}`, tone: 'info' });

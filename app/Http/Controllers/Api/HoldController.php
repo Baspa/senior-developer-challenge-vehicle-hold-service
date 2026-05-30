@@ -9,6 +9,7 @@ use App\Services\HoldService;
 use Illuminate\Http\JsonResponse;
 use App\Models\Vehicle;
 use App\Models\Hold;
+use Illuminate\Http\Request;
 
 class HoldController extends Controller
 {
@@ -30,9 +31,9 @@ class HoldController extends Controller
         return HoldResource::make($hold);
     }
 
-    public function destroy(Hold $hold): HoldResource
+    public function destroy(Request $request, Hold $hold): HoldResource
     {
-        $hold = $this->holdService->release($hold);
+        $hold = $this->holdService->release($hold, $request->header('X-Release-Token'));
 
         return HoldResource::make($hold);
     }

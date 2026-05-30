@@ -32,11 +32,16 @@ class Hold extends Model
         'buyer_ref',
         'status',
         'expires_at',
+        'release_token',
     ];
 
     protected $casts = [
         'status' => HoldStatus::class,
         'expires_at' => 'immutable_datetime',
+    ];
+
+    protected $hidden = [
+        'release_token',
     ];
 
     /** @return BelongsTo<Vehicle, $this> */

@@ -27,3 +27,11 @@ test('show endpoint is publicly accessible (no api key required)', function () {
     // No X-Api-Key header on purpose — show is read-only per the spec.
     getJson("/api/v1/holds/{$hold->id}")->assertSuccessful();
 });
+
+test('never exposes the release token on reads', function () {
+    $hold = Hold::factory()->create();
+
+    getJson("/api/v1/holds/{$hold->id}")
+        ->assertSuccessful()
+        ->assertJsonMissingPath('data.release_token');
+});
