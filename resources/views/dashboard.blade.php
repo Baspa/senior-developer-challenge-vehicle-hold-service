@@ -69,13 +69,41 @@
                             x-show="!hold"
                             x-cloak
                             type="button"
+                            @click="reserve"
+                            :disabled="busy"
                             class="flex-1 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white cursor-pointer"
                         >
-                            <span x-text="'Reserve'"></span>
+                            <span x-text="busy ? 'Reserving…' : 'Reserve'"></span>
+                        </button>
+                        <button
+                            x-show="hold"
+                            x-cloak
+                            type="button"
+                            @click="release"
+                            :disabled="busy"
+                            class="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                        >
+                            <span x-text="busy ? 'Releasing…' : 'Release hold'"></span>
                         </button>
                     </div>
                 </article>
             @endforeach
+        </div>
+
+          <div
+            x-show="toast"
+            x-cloak
+            x-transition.opacity
+            class="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4"
+        >
+            <div
+                class="pointer-events-auto rounded-xl px-4 py-3 text-sm shadow-lg ring-1"
+                :class="toastTone === 'error'
+                    ? 'bg-rose-600 text-white ring-rose-500/30'
+                    : 'bg-zinc-900 text-white ring-white/10 dark:bg-white dark:text-zinc-900'"
+            >
+                <span x-text="toast"></span>
+            </div>
         </div>
     </div>
 </body>
