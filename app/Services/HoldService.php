@@ -10,6 +10,8 @@ use App\Models\Hold;
 use App\Models\Vehicle;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use App\Events\HoldCreated;
+use App\Events\HoldReleased;
 
 class HoldService
 {
@@ -19,7 +21,7 @@ class HoldService
         $expiresAt = now()->addMinutes((int) config('hold.ttl_minutes', 15));
 
         try {
-            return DB::transaction(function () use ($vehicle, $buyerRef, $expiresAt): Hold {
+            $hold = DB::transaction(function () use ($vehicle, $buyerRef, $expiresAt): Hold {
                 $existing = Hold::query()
                     ->active()
                     ->where('vehicle_id', $vehicle->id)
@@ -37,6 +39,10 @@ class HoldService
                     'expires_at' => $expiresAt,
                 ]);
             });
+
+            HoldCreated::dispatch($hold);
+
+            return $hold;
         } catch (QueryException $e) {
             if (! $this->isUniqueViolation($e)) {
                 throw $e;
@@ -54,8 +60,12 @@ class HoldService
         }
 
         $hold->update(['status' => HoldStatus::Released]);
+        
+        $hold = $hold->fresh();
 
-        return $hold->fresh();
+        HoldReleased::dispatch($hold);
+
+        return $hold;
     }
 
     private function isUniqueViolation(QueryException $e): bool

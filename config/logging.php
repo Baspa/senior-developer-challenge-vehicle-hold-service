@@ -52,6 +52,14 @@ return [
 
     'channels' => [
 
+        'holds' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/holds.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
