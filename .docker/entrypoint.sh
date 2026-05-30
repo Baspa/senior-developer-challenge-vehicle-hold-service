@@ -18,6 +18,10 @@ fi
 
 php artisan migrate --force --ansi
 
+if [[ "$(php artisan tinker --execute='echo App\Models\Vehicle::count();' 2>/dev/null)" == "0" ]]; then
+    php artisan db:seed --force --ansi
+fi
+
 php artisan config:cache --ansi
 php artisan route:cache --ansi
 php artisan view:cache --ansi

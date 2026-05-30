@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
@@ -22,7 +23,7 @@ class VehicleFactory extends Factory
     {
         return [
             'vin' => Str::uuid()->toString(),
-            'name' => fake()->randomElement([
+            'name' => Arr::random([
                 'DAF XF',
                 'DAF XG',
                 'DAF XG+',
