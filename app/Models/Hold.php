@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 class Hold extends Model
 {
@@ -30,6 +31,12 @@ class Hold extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    /** @param Builder<Hold> $query */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('status', HoldStatus::Active);
     }
 
     public function secondsUntilExpiry(): int

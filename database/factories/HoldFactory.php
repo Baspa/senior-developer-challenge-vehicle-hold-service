@@ -23,6 +23,7 @@ class HoldFactory extends Factory
             'vehicle_id' => Vehicle::factory(),
             'buyer_ref' => 'lead-' . fake()->numberBetween(1000, 9999),
             'status' => HoldStatus::Active,
+            'expires_at' => now()->addMinutes(15),
         ];
     }
 
