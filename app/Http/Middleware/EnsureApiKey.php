@@ -20,11 +20,11 @@ class EnsureApiKey
         $validApiKey = config('hold.api_key');
 
         if ($apiKey === null) {
-            return new JsonResponse(['message' => 'API key is missing', 'code' => 400], 400);
+            return new JsonResponse(['message' => 'API_KEY_MISSING', 'code' => 400], 400);
         }
 
         if (!hash_equals($validApiKey, $apiKey)) {
-            return new JsonResponse(['message' => 'Invalid API key'], 401);
+            return new JsonResponse(['message' => 'INVALID_API_KEY', 'code' => 401], 401);
         }
 
         return $next($request);

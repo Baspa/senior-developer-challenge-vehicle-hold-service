@@ -31,4 +31,9 @@ class Hold extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
+
+    public function secondsUntilExpiry(): int
+    {
+        return (int) max(0, now()->diffInSeconds($this->expires_at, false));
+    }
 }
