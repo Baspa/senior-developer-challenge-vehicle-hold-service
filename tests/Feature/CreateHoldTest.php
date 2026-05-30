@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Hold;
 use App\Models\Vehicle;
 use App\Enums\HoldStatus;
+use App\Events\HoldCreated;
 
 use function Pest\Laravel\postJson;
 
@@ -13,6 +14,7 @@ beforeEach(function () {
 });
 
 test('creates an active hold and returns 201 with the assignment payload shape', function () {
+    Event::fake();
     $vehicle = Vehicle::factory()->create();
 
     $response = postJson('/api/v1/holds', [
@@ -27,6 +29,8 @@ test('creates an active hold and returns 201 with the assignment payload shape',
         ->assertJsonStructure(['data' => ['id', 'vehicle_id', 'buyer_ref', 'status', 'expires_at', 'seconds_until_expiry']]);
 
     expect(Hold::query()->active()->count())->toBe(1);
+
+    Event::assertDispatched(HoldCreated::class);
 });
 
 test('returns 409 with active hold details when one already exists', function () {

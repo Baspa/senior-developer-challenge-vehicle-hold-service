@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\HoldStatus;
 use App\Models\Hold;
 use App\Models\Vehicle;
+use App\Events\HoldReleased;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\postJson;
@@ -14,6 +15,7 @@ beforeEach(function () {
 });
 
 test('releases an active hold and returns 200', function () {
+    Event::fake();
     $hold = Hold::factory()->create();
 
     deleteJson("/api/v1/holds/{$hold->id}", [], ['X-Api-Key' => 'test-key'])
@@ -24,6 +26,8 @@ test('releases an active hold and returns 200', function () {
 
     expect($hold->fresh()->status)->toBe(HoldStatus::Released);
     expect(Hold::query()->active()->count())->toBe(0);
+
+    Event::assertDispatched(HoldReleased::class);
 });
 
 test('frees the vehicle so a fresh hold can be placed', function () {
@@ -39,6 +43,7 @@ test('frees the vehicle so a fresh hold can be placed', function () {
 });
 
 test('is idempotent when the hold is already released', function () {
+    Event::fake();
     $hold = Hold::factory()->released()->create();
 
     deleteJson("/api/v1/holds/{$hold->id}", [], ['X-Api-Key' => 'test-key'])
@@ -46,6 +51,7 @@ test('is idempotent when the hold is already released', function () {
         ->assertJsonPath('data.status', HoldStatus::Released->value);
 
     expect($hold->fresh()->status)->toBe(HoldStatus::Released);
+    Event::assertNotDispatched(HoldReleased::class);
 });
 
 test('requires an api key', function () {
