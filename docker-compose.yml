@@ -1,0 +1,65 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: vehicle-soft-hold:latest
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app-storage:/var/www/html/storage
+    networks: [hold-net]
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    image: vehicle-soft-hold-web:latest
+    depends_on: [app]
+    ports:
+      - "8080:80"
+    networks: [hold-net]
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: holds
+      POSTGRES_USER: holds
+      POSTGRES_PASSWORD: holds
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U holds -d holds"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [hold-net]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: vehicle-soft-hold:latest
+    env_file: .env.docker
+    depends_on:
+      app:
+        condition: service_started
+      db:
+        condition: service_healthy
+    volumes:
+      - app-storage:/var/www/html/storage
+    command: ["php", "artisan", "schedule:work"]
+    networks: [hold-net]
+
+volumes:
+  db-data:
+  app-storage:
+
+networks:
+  hold-net:
+    driver: bridge
